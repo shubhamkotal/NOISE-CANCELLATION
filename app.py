@@ -41,7 +41,6 @@ except:
 
 # all deepxi codes
 
-#hemasunder
 # Functions for audio handling
 def save_wav(path, wav, f_s):
     """"
@@ -114,7 +113,7 @@ class STFT:
         NFFT               -  number of DFT componts [ Discrete fourier transform]
         f_s                - sampling freq
     """
-    #Mohit
+    
     def __init__(self, N_d, N_s, NFFT, f_s):
         self.N_d = N_d
         self.N_s = N_s
@@ -122,7 +121,7 @@ class STFT:
         self.f_s = f_s
         self.W = functools.partial(window_ops.hamming_window, periodic=False) # A callable that takes a window length and returns a [window_length] Tensor of samples in the provided datatype.
         self.ten = tf.cast(10.0, tf.float32) # Casting the tensor to the float32 type
-    #Mohit
+    
     def polar_analysis(self, x):
         """
         x                  -  Input numpy array
@@ -133,7 +132,7 @@ class STFT:
       """
         STFT = tf.signal.stft(x, self.N_d, self.N_s, self.NFFT, window_fn=self.W, pad_end=True) # Find STFT of a given signal
         return tf.abs(STFT), tf.math.angle(STFT) # Returns magnitude and phase angle of resulting STFT
-    #Rohan
+    
     def polar_synthesis(self, STMS, STPS):
         """
         tf.cast                      - Casts a tensor to a new type
@@ -156,7 +155,7 @@ class DeepXiInput(STFT):
         super().__init__(N_d, N_s, NFFT, f_s)
         self.mu = mu 
         self.sigma = sigma
-    #Nobody        
+           
     def observation(self, x):
         """
         Returns STMS and STPS from the given input numpy (converted audio file)
@@ -168,14 +167,14 @@ class DeepXiInput(STFT):
 
 
     # Defining all functions required for processing audio file after converting it to tensors using tensor mathematical operations. 
-    #Shubham
+    
     def normalise(self, x):
         #normailzation / standardization
         """
         Normalize the given input np array  
         """
         return tf.truediv(tf.cast(x, tf.float32), 32768.0) # Divides x tensor by y elementwise
-    #Shubham
+    
     def n_frames(self, N):
         """
         tf.math.ceil - Return the ceiling of the input, element-wise
@@ -183,7 +182,7 @@ class DeepXiInput(STFT):
         return tf.cast(tf.math.ceil(tf.truediv(tf.cast(N, tf.float32), tf.cast(self.N_s, tf.float32))), tf.int32)
 
 
-    #Surya
+    
     def xi_hat(self, xi_bar_hat):
         """
         scipy.special.erfinv(y)  -  Inverse of the gause error function erf.
@@ -195,7 +194,7 @@ class DeepXiInput(STFT):
 
 
 # MMSE-LSA gain function.
-#Purnasai
+
 def gfunc(xi, gamma=None):
     """
     MMSE-LSA Gain function
@@ -313,7 +312,7 @@ class DeepXi(DeepXiInput):
             y_STMS = np.multiply(x_STMS, gfunc(xi_hat, xi_hat+1))
             y = self.polar_synthesis(y_STMS, x_STPS).numpy()
             save_wav(out_path+ base_name + '.wav', y, self.f_s)
-    #purnasai
+    
     def sample_stats(self,stats_path='data/'): # loading sample stats present in sample stats folder as a zip file # existing stats files, required for following operations.
         if os.path.exists(stats_path + 'stats.npz'):
             print('Loading sample statistics...')
@@ -322,7 +321,7 @@ class DeepXi(DeepXiInput):
                 self.sigma = stats['sigma_hat'] #getting value for sigma from the stats file
                 
 
-    #Rohan
+    
     def observation_batch(self, x_batch, x_batch_len):
         """
         batch_size       - getting size of numpy (converted audio)
